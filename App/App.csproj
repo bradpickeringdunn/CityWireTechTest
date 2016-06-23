@@ -45,12 +45,16 @@
   <ItemGroup>
     <Compile Include="Classification.cs" />
     <Compile Include="Company.cs" />
-    <Compile Include="CompanyRepository.cs" />
-    <Compile Include="Customer.cs" />
-    <Compile Include="CustomerCreditService.cs" />
+    <Compile Include="DataAccess\CompanyRepository.cs" />
+    <Compile Include="DataAccess\ICompanyRepository.cs" />
+    <Compile Include="Models\Customer.cs" />
+    <Compile Include="Rules\ValidateCustomer.cs" />
+    <Compile Include="Services\CustomerCreditService.cs" />
     <Compile Include="CustomerDataAccess.cs" />
     <Compile Include="CustomerService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\ICustomerCreditServiceChannel.cs" />
+    <Compile Include="Services\ICustomerCreditServiceClient.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using App.DataAccess;
+using App.Models;
+using App.Rules;
+using App.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,74 +11,65 @@ namespace App
 {
     public class CustomerService
     {
-        public bool AddCustomer(string firname, string surname, string email, DateTime dateOfBirth, int companyId)
+        private ICustomerCreditService customerCreditService;
+        private ICompanyRepository companyRepository;
+
+        public CustomerService(ICustomerCreditService customerCreditService, ICompanyRepository companyRepository)
         {
-            if (string.IsNullOrEmpty(firname) || string.IsNullOrEmpty(surname))
+            this.customerCreditService = customerCreditService;
+            this.companyRepository = companyRepository;
+        }
+
+        public bool AddCustomer(Customer customer, int companyId)
+        {
+            var addedCustomerResult = false;
+
+            if (ValidateCustomer.CustomerValid(customer))
             {
-                return false;
-            }
 
-            if (!email.Contains("@") && !email.Contains("."))
-            {
-                return false;
-            }
+                var company = companyRepository.GetById(companyId);
 
-            var now = DateTime.Now;
-            int age = now.Year - dateOfBirth.Year;
-            if (now.Month < dateOfBirth.Month || (now.Month == dateOfBirth.Month && now.Day < dateOfBirth.Day)) age--;
+                customer.Company = company;
 
-            if (age < 21)
-            {
-                return false;
-            }
-
-            var companyRepository = new CompanyRepository();
-            var company = companyRepository.GetById(companyId);
-
-            var customer = new Customer
-                               {
-                                   Company = company,
-                                   DateOfBirth = dateOfBirth,
-                                   EmailAddress = email,
-                                   Firstname = firname,
-                                   Surname = surname
-                               };
-
-            if (company.Name == "VeryImportantClient")
-            {
-                // Skip credit check
-                customer.HasCreditLimit = false;
-            }
-            else if (company.Name == "ImportantClient")
-            {
-                // Do credit check and double credit limit
-                customer.HasCreditLimit = true;
-                using (var customerCreditService = new CustomerCreditServiceClient())
+                if (company.Name == "VeryImportantClient")
                 {
-                    var creditLimit = customerCreditService.GetCreditLimit(customer.Firstname, customer.Surname, customer.DateOfBirth);
-                    creditLimit = creditLimit*2;
-                    customer.CreditLimit = creditLimit;
+                    // Skip credit check
+                    customer.HasCreditLimit = false;
                 }
-            }
-            else
-            {
-                // Do credit check
-                customer.HasCreditLimit = true;
-                using (var customerCreditService = new CustomerCreditServiceClient())
+                else if (company.Name == "ImportantClient")
                 {
-                    var creditLimit = customerCreditService.GetCreditLimit(customer.Firstname, customer.Surname, customer.DateOfBirth);
-                    customer.CreditLimit = creditLimit;
+                    // Do credit check and double credit limit
+                    customer.HasCreditLimit = true;
+                    using (var customerCreditService = new CustomerCreditServiceClient())
+                    {
+                        var creditLimit = customerCreditService.GetCreditLimit(customer.Firstname, customer.Surname, customer.DateOfBirth);
+                        creditLimit = creditLimit * 2;
+                        customer.CreditLimit = creditLimit;
+                    }
                 }
+                else
+                {
+                    // Do credit check
+                    customer.HasCreditLimit = true;
+                    using (var customerCreditService = new CustomerCreditServiceClient())
+                    {
+                        var creditLimit = customerCreditService.GetCreditLimit(customer.Firstname, customer.Surname, customer.DateOfBirth);
+                        customer.CreditLimit = creditLimit;
+                    }
+                }
+
+                if (customer.HasCreditLimit && customer.CreditLimit < 500)
+                {
+                    return false;
+                }
+
+                CustomerDataAccess.AddCustomer(customer);
+
+                return true;
+
             }
 
-            if (customer.HasCreditLimit && customer.CreditLimit < 500)
-            {
-                return false;
-            }
-
-            CustomerDataAccess.AddCustomer(customer);
-
-            return true;
+            return addedCustomerResult;
         }
     }
 }
