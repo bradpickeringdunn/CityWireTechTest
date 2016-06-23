@@ -7,11 +7,11 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 
-namespace App
+namespace App.DataAccess
 {
-    public static class CustomerDataAccess
+    public class CustomerDataAccess : ICustomerDataAccess
     {
-        public static void AddCustomer(Customer customer)
+        public void AddCustomer(Customer customer)
         {
             var connectionString = ConfigurationManager.ConnectionStrings["appDatabase"].ConnectionString;
 

@@ -14,5 +14,6 @@ namespace App.Services
 
         [OperationContractAttribute(Action = "http://tempuri.org/ICustomerCreditService/GetCreditLimit", ReplyAction = "http://tempuri.org/ICustomerCreditService/GetCreditLimitResponse")]
         int GetCreditLimit(string firstname, string surname, System.DateTime dateOfBirth);
+        
     }
 }

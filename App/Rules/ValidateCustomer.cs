@@ -24,23 +24,23 @@ namespace App.Rules
             int age = now.Year - dateOfBirth.Year;
             if (now.Month < dateOfBirth.Month || (now.Month == dateOfBirth.Month && now.Day < dateOfBirth.Day)) age--;
 
-            return age < 21;
+            return age > 21;
 
         }
 
         private static bool ValidEmail(string emailAddress)
         {
-            return !emailAddress.Contains("@") && !emailAddress.Contains(".");
+            return emailAddress.Contains("@") && emailAddress.Contains(".");
         }
 
         private static bool ValidSurname(string surname)
         {
-            return string.IsNullOrEmpty(surname);
+            return !string.IsNullOrEmpty(surname);
         }
 
         private static bool ValidFirstname(string firstname)
         {
-            return string.IsNullOrEmpty(firstname);
+            return !string.IsNullOrEmpty(firstname);
         }
     }
 }
